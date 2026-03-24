@@ -40,8 +40,25 @@ LegalMCP:  Found 52 results. Top case:
 
 ### Install
 
+We recommend using a virtual environment to avoid conflicts with other packages:
+
 ```bash
+# Create and activate a virtual environment
+python -m venv legal-mcp-env
+
+# Windows
+legal-mcp-env\Scripts\activate
+
+# Mac/Linux
+source legal-mcp-env/bin/activate
+
+# Install
 pip install legal-mcp
+```
+
+Or install from GitHub:
+```bash
+pip install git+https://github.com/Mahender22/legal-mcp.git
 ```
 
 ### Run
@@ -53,22 +70,46 @@ legal-mcp
 ### Try Demo Mode (No API Keys Needed)
 
 ```bash
+# Mac/Linux
 LEGAL_MCP_DEMO=true legal-mcp
+
+# Windows
+set LEGAL_MCP_DEMO=true && legal-mcp
 ```
 
 ### Connect to Claude Desktop
 
 Add to your `claude_desktop_config.json`:
 
+**Windows** (`%APPDATA%\Claude\claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
     "legal-mcp": {
-      "command": "legal-mcp"
+      "command": "C:/path/to/legal-mcp-env/Scripts/legal-mcp.exe",
+      "env": {
+        "LEGAL_MCP_DEMO": "true"
+      }
     }
   }
 }
 ```
+
+**Mac/Linux** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "legal-mcp": {
+      "command": "/path/to/legal-mcp-env/bin/legal-mcp",
+      "env": {
+        "LEGAL_MCP_DEMO": "true"
+      }
+    }
+  }
+}
+```
+
+> **Note:** Use the full path to `legal-mcp` inside your virtual environment. Remove the `LEGAL_MCP_DEMO` line and add your API keys for real data (see [SETUP.md](SETUP.md)).
 
 ### Connect to Claude Code
 
@@ -78,7 +119,7 @@ Add to your project's `.mcp.json`:
 {
   "mcpServers": {
     "legal-mcp": {
-      "command": "legal-mcp"
+      "command": "/path/to/legal-mcp-env/bin/legal-mcp"
     }
   }
 }
