@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "legal-mcp": {
+      "command": "C:\\Users\\mahen\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+      "args": ["-m", "legal_mcp.src.server"],
+      "cwd": "C:\\GO-CRAZY\\legal-mcp",
+      "env": {
+        "COURTLISTENER_TOKEN": ""
+      }
+    }
+  }
+}

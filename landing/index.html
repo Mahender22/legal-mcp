@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalMCP — US Case Law & Practice Management for AI Assistants</title>
+    <meta name="description" content="The first comprehensive MCP server connecting Claude and GPT to real US case law, Clio practice management, and PACER court filings.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        chamber: {
+                            950: '#0a0e1a',
+                            900: '#0f1629',
+                            800: '#1a2240',
+                            700: '#253052',
+                            600: '#334170',
+                            500: '#4a5a8a',
+                        },
+                        gold: {
+                            400: '#d4a853',
+                            500: '#c4943f',
+                            600: '#a87c30',
+                        },
+                        parchment: {
+                            50: '#faf8f2',
+                            100: '#f0ece0',
+                            200: '#e0d8c8',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'Georgia', 'serif'],
+                        body: ['DM Sans', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-font-smoothing: antialiased; }
+
+        .noise-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .hero-glow {
+            background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(212,168,83,0.08) 0%, transparent 70%);
+        }
+
+        .gold-line {
+            background: linear-gradient(90deg, transparent, #d4a853, transparent);
+            height: 1px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(26,34,64,0.8) 0%, rgba(15,22,41,0.9) 100%);
+            border: 1px solid rgba(212,168,83,0.12);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .feature-card:hover {
+            border-color: rgba(212,168,83,0.35);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5), 0 0 40px -10px rgba(212,168,83,0.08);
+        }
+
+        .pricing-card {
+            background: linear-gradient(180deg, rgba(26,34,64,0.6) 0%, rgba(15,22,41,0.8) 100%);
+            border: 1px solid rgba(212,168,83,0.1);
+            transition: all 0.4s ease;
+        }
+        .pricing-card.featured {
+            border-color: rgba(212,168,83,0.4);
+            background: linear-gradient(180deg, rgba(37,48,82,0.8) 0%, rgba(15,22,41,0.9) 100%);
+        }
+        .pricing-card:hover { border-color: rgba(212,168,83,0.3); }
+
+        .code-block {
+            background: linear-gradient(135deg, #0d1220 0%, #111827 100%);
+            border: 1px solid rgba(212,168,83,0.1);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideRight {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero-title { animation: fadeUp 1s ease forwards; }
+        .hero-sub { animation: fadeUp 1s 0.2s ease forwards; opacity: 0; }
+        .hero-cta { animation: fadeUp 1s 0.4s ease forwards; opacity: 0; }
+        .hero-code { animation: fadeUp 1s 0.6s ease forwards; opacity: 0; }
+
+        .cursor-blink::after {
+            content: '|'; animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; } 50% { opacity: 0; }
+        }
+
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-top: 1rem; }
+        .faq-item.open .faq-chevron { transform: rotate(180deg); }
+        .faq-chevron { transition: transform 0.3s ease; }
+
+        .stat-number {
+            background: linear-gradient(135deg, #d4a853, #f0d78c);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        input::placeholder { color: rgba(160,160,180,0.5); }
+        input:focus { outline: none; border-color: rgba(212,168,83,0.5); box-shadow: 0 0 0 3px rgba(212,168,83,0.1); }
+    </style>
+</head>
+
+<body class="bg-chamber-950 text-parchment-100 font-body antialiased overflow-x-hidden">
+    <div class="noise-overlay"></div>
+
+    <!-- NAV -->
+    <nav class="fixed top-0 w-full z-50 backdrop-blur-md bg-chamber-950/80 border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-7 h-7 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/>
+                </svg>
+                <span class="font-display font-bold text-lg tracking-tight">Legal<span class="text-gold-400">MCP</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm text-parchment-200/60">
+                <a href="#features" class="hover:text-gold-400 transition-colors">Features</a>
+                <a href="#demo" class="hover:text-gold-400 transition-colors">Demo</a>
+                <a href="#pricing" class="hover:text-gold-400 transition-colors">Pricing</a>
+                <a href="#faq" class="hover:text-gold-400 transition-colors">FAQ</a>
+            </div>
+            <a href="#waitlist" class="px-5 py-2 text-sm font-medium bg-gold-400/10 text-gold-400 border border-gold-400/20 rounded-lg hover:bg-gold-400/20 transition-all">
+                Join Waitlist
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="relative pt-32 pb-20 px-6 hero-glow">
+        <div class="max-w-6xl mx-auto">
+            <div class="max-w-3xl">
+                <div class="hero-title">
+                    <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-6">The First Comprehensive US Legal MCP Server</p>
+                    <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
+                        Real case law.<br>
+                        <span class="text-gold-400 italic">Inside your AI.</span>
+                    </h1>
+                </div>
+                <p class="hero-sub text-lg md:text-xl text-parchment-200/60 mt-8 max-w-xl leading-relaxed">
+                    Connect Claude or GPT to millions of US court opinions, your Clio practice data, and PACER filings. Research in seconds, not hours.
+                </p>
+                <div class="hero-cta flex flex-col sm:flex-row gap-4 mt-10">
+                    <a href="#waitlist" class="inline-flex items-center justify-center px-8 py-4 bg-gold-400 text-chamber-950 font-semibold rounded-lg hover:bg-gold-500 transition-all text-base shadow-lg shadow-gold-400/20">
+                        Join the Waitlist
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                    <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 border border-parchment-200/15 text-parchment-100 rounded-lg hover:border-gold-400/30 hover:text-gold-400 transition-all text-base">
+                        See it in action
+                    </a>
+                </div>
+            </div>
+
+            <!-- HERO CODE DEMO -->
+            <div class="hero-code mt-16 code-block rounded-2xl p-6 md:p-8 font-mono text-sm max-w-3xl">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-3 h-3 rounded-full bg-red-500/60"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500/60"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/60"></div>
+                    <span class="text-parchment-200/30 text-xs ml-3">Claude Desktop</span>
+                </div>
+                <div class="space-y-3 text-parchment-200/70">
+                    <p><span class="text-gold-400/80">You:</span> Find Supreme Court cases about Fourth Amendment and cell phone location data after 2015</p>
+                    <div class="border-l-2 border-gold-400/20 pl-4 py-1">
+                        <p class="text-parchment-200/40 text-xs mb-1">Using: search_case_law</p>
+                        <p><span class="text-gold-400/80">LegalMCP:</span> Found 52 results. Top case: <span class="text-parchment-50">Carpenter v. United States</span>, 585 U.S. 296 (2018) — The Court held that accessing historical cell-site location information constitutes a search under the Fourth Amendment...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="py-12 px-6 border-y border-white/5">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div class="animate-on-scroll">
+                <p class="stat-number font-display text-3xl md:text-4xl font-bold">4M+</p>
+                <p class="text-parchment-200/40 text-sm mt-1">Court Opinions</p>
+            </div>
+            <div class="animate-on-scroll" style="transition-delay:0.1s">
+                <p class="stat-number font-display text-3xl md:text-4xl font-bold">400+</p>
+                <p class="text-parchment-200/40 text-sm mt-1">Courts Covered</p>
+            </div>
+            <div class="animate-on-scroll" style="transition-delay:0.2s">
+                <p class="stat-number font-display text-3xl md:text-4xl font-bold">18</p>
+                <p class="text-parchment-200/40 text-sm mt-1">MCP Tools</p>
+            </div>
+            <div class="animate-on-scroll" style="transition-delay:0.3s">
+                <p class="stat-number font-display text-3xl md:text-4xl font-bold">&lt;2s</p>
+                <p class="text-parchment-200/40 text-sm mt-1">Avg Response</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="py-24 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 animate-on-scroll">
+                <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">Capabilities</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold">Everything your AI needs<br>to practice law</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">Case Law Search</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Search millions of US court opinions from CourtListener. Filter by court, date range, jurisdiction. Real cases, real citations — not hallucinations.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll" style="transition-delay:0.1s">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.086-9.086a4.5 4.5 0 00-6.364 0l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">Citation Tracing</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Trace citation networks forward and backward. Find who cited a case, what a ruling relied on, and how precedent flows through the courts.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll" style="transition-delay:0.2s">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">Citation Parser</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Paste any legal text and instantly parse Bluebook citations. Identifies volume, reporter, page, court, and year from standard formats.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">Clio Integration</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Access your Clio practice data from AI. Search contacts, matters, time entries, documents, and calendar — without leaving the conversation.</p>
+                    <span class="inline-block mt-3 text-xs font-mono text-gold-400/60 bg-gold-400/5 px-2 py-1 rounded">PRO</span>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll" style="transition-delay:0.1s">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">PACER Filings</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Look up federal court filings, docket entries, and case records directly through PACER. Track active litigation without the clunky PACER interface.</p>
+                    <span class="inline-block mt-3 text-xs font-mono text-gold-400/60 bg-gold-400/5 px-2 py-1 rounded">PRO</span>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card rounded-2xl p-7 animate-on-scroll" style="transition-delay:0.2s">
+                    <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center mb-5">
+                        <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+                    </div>
+                    <h3 class="font-display text-lg font-semibold mb-2">Works with Any AI</h3>
+                    <p class="text-parchment-200/50 text-sm leading-relaxed">Standard MCP protocol. Works with Claude Desktop, Claude Code, Cursor, Windsurf, and any MCP-compatible AI assistant out of the box.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEMO -->
+    <section id="demo" class="py-24 px-6 border-t border-white/5">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 animate-on-scroll">
+                <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">In Action</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold">Legal research at the<br>speed of thought</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="code-block rounded-2xl p-6 animate-on-scroll">
+                    <p class="text-gold-400/60 font-mono text-xs uppercase tracking-wider mb-4">Example 1 — Case Research</p>
+                    <div class="space-y-4 text-sm">
+                        <p class="text-parchment-200/80"><span class="text-gold-400">></span> "What's the current standard for qualified immunity in the 9th Circuit?"</p>
+                        <div class="border-l border-gold-400/20 pl-4 text-parchment-200/50">
+                            <p>Searching 9th Circuit case law... Found 847 results.</p>
+                            <p class="mt-2 text-parchment-200/70">The leading case is <strong>Kisela v. Hughes</strong>, 584 U.S. 100 (2018), where SCOTUS reversed the 9th Circuit, reaffirming that qualified immunity protects officers unless existing precedent placed the constitutional question "beyond debate"...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block rounded-2xl p-6 animate-on-scroll" style="transition-delay:0.15s">
+                    <p class="text-gold-400/60 font-mono text-xs uppercase tracking-wider mb-4">Example 2 — Practice Management</p>
+                    <div class="space-y-4 text-sm">
+                        <p class="text-parchment-200/80"><span class="text-gold-400">></span> "What's the total billable time on the Henderson matter this month?"</p>
+                        <div class="border-l border-gold-400/20 pl-4 text-parchment-200/50">
+                            <p>Querying Clio time entries for Henderson (#2024-0847)...</p>
+                            <p class="mt-2 text-parchment-200/70"><strong>42.5 hours</strong> billed across 3 attorneys. $18,750 at blended rate. 6 entries pending review. Next deadline: Motion to Compel due March 28.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="py-24 px-6 border-t border-white/5">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 animate-on-scroll">
+                <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">Pricing</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold">Less than one billable hour</h2>
+                <p class="text-parchment-200/50 mt-4 max-w-md mx-auto">Pays for itself the first time it saves you from a 3-hour research session.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                <!-- Starter -->
+                <div class="pricing-card rounded-2xl p-8 animate-on-scroll">
+                    <p class="text-gold-400/60 font-mono text-xs uppercase tracking-wider mb-2">Starter</p>
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span class="font-display text-4xl font-bold">$79</span>
+                        <span class="text-parchment-200/40 text-sm">/month</span>
+                    </div>
+                    <div class="gold-line mb-6 opacity-20"></div>
+                    <ul class="space-y-3 text-sm text-parchment-200/60 mb-8">
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Full US case law search (4M+ opinions)</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Citation parsing & tracing</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>400+ courts & jurisdictions</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Works with Claude, GPT, Cursor</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Email support</li>
+                    </ul>
+                    <a href="#waitlist" class="block w-full py-3 text-center text-sm font-medium border border-gold-400/20 text-gold-400 rounded-lg hover:bg-gold-400/10 transition-all">
+                        Join Waitlist
+                    </a>
+                </div>
+
+                <!-- Pro -->
+                <div class="pricing-card featured rounded-2xl p-8 animate-on-scroll relative" style="transition-delay:0.1s">
+                    <div class="absolute -top-3 right-8 px-3 py-1 bg-gold-400 text-chamber-950 text-xs font-bold rounded-full">RECOMMENDED</div>
+                    <p class="text-gold-400 font-mono text-xs uppercase tracking-wider mb-2">Pro</p>
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span class="font-display text-4xl font-bold">$149</span>
+                        <span class="text-parchment-200/40 text-sm">/month</span>
+                    </div>
+                    <div class="gold-line mb-6 opacity-40"></div>
+                    <ul class="space-y-3 text-sm text-parchment-200/60 mb-8">
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Everything in Starter</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><strong class="text-parchment-100">Clio integration</strong> — contacts, matters, billing, docs</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><strong class="text-parchment-100">PACER access</strong> — federal filings & dockets</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Calendar & deadline tracking</li>
+                        <li class="flex items-start gap-3"><svg class="w-4 h-4 text-gold-400 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Priority support & onboarding</li>
+                    </ul>
+                    <a href="#waitlist" class="block w-full py-3 text-center text-sm font-semibold bg-gold-400 text-chamber-950 rounded-lg hover:bg-gold-500 transition-all shadow-lg shadow-gold-400/15">
+                        Join Waitlist — Pro
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-24 px-6 border-t border-white/5">
+        <div class="max-w-2xl mx-auto">
+            <div class="text-center mb-16 animate-on-scroll">
+                <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">FAQ</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold">Common Questions</h2>
+            </div>
+
+            <div class="space-y-4">
+                <div class="faq-item animate-on-scroll border border-white/5 rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
+                    <div class="flex items-center justify-between p-5">
+                        <p class="font-medium text-sm">Does this replace Westlaw or LexisNexis?</p>
+                        <svg class="faq-chevron w-4 h-4 text-gold-400/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="faq-answer px-5 pb-5 text-sm text-parchment-200/50 leading-relaxed">
+                        LegalMCP is a research accelerator, not a complete replacement. It connects your AI to real case law data from CourtListener (the largest open legal database). For comprehensive Shepardizing or proprietary editorial content, you'd still use Westlaw/Lexis. But for 80% of quick research tasks, LegalMCP inside your AI is faster and cheaper.
+                    </div>
+                </div>
+
+                <div class="faq-item animate-on-scroll border border-white/5 rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
+                    <div class="flex items-center justify-between p-5">
+                        <p class="font-medium text-sm">Is the case data accurate?</p>
+                        <svg class="faq-chevron w-4 h-4 text-gold-400/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="faq-answer px-5 pb-5 text-sm text-parchment-200/50 leading-relaxed">
+                        Yes. LegalMCP returns real data from CourtListener and PACER — actual court opinions, real citations, genuine docket entries. Unlike a plain AI chatbot that might hallucinate case names, every result from LegalMCP is sourced from official court records.
+                    </div>
+                </div>
+
+                <div class="faq-item animate-on-scroll border border-white/5 rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
+                    <div class="flex items-center justify-between p-5">
+                        <p class="font-medium text-sm">What AI assistants does it work with?</p>
+                        <svg class="faq-chevron w-4 h-4 text-gold-400/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="faq-answer px-5 pb-5 text-sm text-parchment-200/50 leading-relaxed">
+                        LegalMCP uses the Model Context Protocol (MCP) standard, supported by Claude Desktop, Claude Code, Cursor, Windsurf, and any MCP-compatible client. If your AI tool supports MCP, it works with LegalMCP.
+                    </div>
+                </div>
+
+                <div class="faq-item animate-on-scroll border border-white/5 rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
+                    <div class="flex items-center justify-between p-5">
+                        <p class="font-medium text-sm">Is my Clio data secure?</p>
+                        <svg class="faq-chevron w-4 h-4 text-gold-400/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="faq-answer px-5 pb-5 text-sm text-parchment-200/50 leading-relaxed">
+                        LegalMCP connects to Clio using OAuth — your credentials never pass through our servers. The MCP server runs locally on your machine, so practice data stays on your hardware. We never store, log, or have access to your client information.
+                    </div>
+                </div>
+
+                <div class="faq-item animate-on-scroll border border-white/5 rounded-xl cursor-pointer" onclick="this.classList.toggle('open')">
+                    <div class="flex items-center justify-between p-5">
+                        <p class="font-medium text-sm">Can I try it before paying?</p>
+                        <svg class="faq-chevron w-4 h-4 text-gold-400/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <div class="faq-answer px-5 pb-5 text-sm text-parchment-200/50 leading-relaxed">
+                        Yes. Join the waitlist and you'll get a 14-day free trial with full access to all features. No credit card required to start.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WAITLIST -->
+    <section id="waitlist" class="py-24 px-6 border-t border-white/5">
+        <div class="max-w-xl mx-auto text-center">
+            <div class="animate-on-scroll">
+                <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">Early Access</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold mb-4">Join the waitlist</h2>
+                <p class="text-parchment-200/50 mb-10">Be the first to access LegalMCP when we launch. Early members get 30% off for life.</p>
+
+                <form class="flex flex-col sm:flex-row gap-3" onsubmit="handleWaitlist(event)">
+                    <input type="email" id="waitlist-email" placeholder="you@lawfirm.com" required
+                        class="flex-1 px-5 py-3.5 bg-chamber-800/50 border border-white/10 rounded-lg text-parchment-100 text-sm font-body">
+                    <button type="submit" id="waitlist-btn"
+                        class="px-8 py-3.5 bg-gold-400 text-chamber-950 font-semibold rounded-lg hover:bg-gold-500 transition-all text-sm shadow-lg shadow-gold-400/20 whitespace-nowrap">
+                        Get Early Access
+                    </button>
+                </form>
+                <p id="waitlist-msg" class="text-sm mt-4 text-gold-400 hidden"></p>
+                <p class="text-parchment-200/30 text-xs mt-6">No spam. Unsubscribe anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 px-6 border-t border-white/5">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-gold-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z"/>
+                </svg>
+                <span class="font-display font-bold text-sm text-parchment-200/40">Legal<span class="text-gold-400/40">MCP</span></span>
+            </div>
+            <p class="text-parchment-200/20 text-xs">Not legal advice. For research purposes only. &copy; 2026 LegalMCP.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+        // Waitlist handler
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8080' : '';
+
+        async function handleWaitlist(e) {
+            e.preventDefault();
+            const email = document.getElementById('waitlist-email').value;
+            const btn = document.getElementById('waitlist-btn');
+            const msg = document.getElementById('waitlist-msg');
+            btn.textContent = 'Joining...';
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`${API_URL}/api/waitlist`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, plan: 'starter'}),
+                });
+                const data = await resp.json();
+                btn.textContent = "You're in!";
+                btn.classList.remove('bg-gold-400', 'hover:bg-gold-500');
+                btn.classList.add('bg-green-600');
+                msg.textContent = data.message;
+                msg.classList.remove('hidden');
+            } catch (err) {
+                btn.textContent = 'Get Early Access';
+                btn.disabled = false;
+                msg.textContent = 'Something went wrong. Please try again.';
+                msg.classList.remove('hidden', 'text-gold-400');
+                msg.classList.add('text-red-400');
+            }
+        }
+    </script>
+</body>
+</html>
