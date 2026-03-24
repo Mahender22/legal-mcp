@@ -1,0 +1,19 @@
+services:
+  legal-mcp:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  waitlist:
+    build: .
+    command: python landing/api/waitlist.py
+    ports:
+      - "8080:8080"
+    volumes:
+      - waitlist-data:/app/landing/api
+    restart: unless-stopped
+
+volumes:
+  waitlist-data:

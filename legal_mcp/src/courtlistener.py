@@ -12,6 +12,37 @@ async def _get_headers() -> dict:
     return headers
 
 
+async def _request(method: str, url: str, **kwargs) -> dict:
+    """Make HTTP request with helpful error handling."""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await getattr(client, method)(url, headers=await _get_headers(), **kwargs)
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.TimeoutException:
+        raise ConnectionError(
+            "CourtListener API timed out. The service may be temporarily unavailable. "
+            "Try again in a few seconds."
+        )
+    except httpx.HTTPStatusError as e:
+        status = e.response.status_code
+        if status == 401:
+            raise PermissionError(
+                "CourtListener authentication failed. Check your COURTLISTENER_TOKEN "
+                "environment variable. Get a free token at https://www.courtlistener.com/sign-in/"
+            )
+        elif status == 429:
+            raise ConnectionError(
+                "CourtListener rate limit exceeded. Wait a moment and try again. "
+                "Set COURTLISTENER_TOKEN for higher rate limits."
+            )
+        raise ConnectionError(f"CourtListener API error (HTTP {status}): {e}")
+    except httpx.ConnectError:
+        raise ConnectionError(
+            "Cannot connect to CourtListener. Check your internet connection."
+        )
+
+
 async def search_opinions(
     query: str,
     court: Optional[str] = None,
@@ -20,16 +51,12 @@ async def search_opinions(
     citation: Optional[str] = None,
     page: int = 1,
 ) -> dict:
-    """Search CourtListener for court opinions.
+    """Search CourtListener for court opinions."""
+    from . import config
+    if getattr(config, "DEMO_MODE", False):
+        from .demo_data import get_demo_search_results
+        return get_demo_search_results(query)
 
-    Args:
-        query: Search terms (case name, legal concept, statute, etc.)
-        court: Court filter (e.g., 'scotus', 'ca9', 'nysd')
-        date_after: Filter opinions filed after this date (YYYY-MM-DD)
-        date_before: Filter opinions filed before this date (YYYY-MM-DD)
-        citation: Search by citation string
-        page: Page number for pagination
-    """
     params = {"type": "o", "q": query}
     if court:
         params["court"] = court
@@ -40,100 +67,63 @@ async def search_opinions(
     if citation:
         params["citation"] = citation
 
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/search/",
-            params=params,
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request("get", f"{COURTLISTENER_API_URL}/search/", params=params)
 
 
 async def get_opinion(opinion_id: int) -> dict:
-    """Get a specific opinion by ID from CourtListener.
+    """Get a specific opinion by ID from CourtListener."""
+    from . import config
+    if getattr(config, "DEMO_MODE", False):
+        from .demo_data import get_demo_opinion
+        return get_demo_opinion(opinion_id)
 
-    Args:
-        opinion_id: The CourtListener opinion ID
-    """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/opinions/{opinion_id}/",
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request("get", f"{COURTLISTENER_API_URL}/opinions/{opinion_id}/")
 
 
 async def get_cluster(cluster_id: int) -> dict:
-    """Get an opinion cluster (group of related opinions) by ID.
-
-    Args:
-        cluster_id: The CourtListener cluster ID
-    """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/clusters/{cluster_id}/",
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    """Get an opinion cluster (group of related opinions) by ID."""
+    return await _request("get", f"{COURTLISTENER_API_URL}/clusters/{cluster_id}/")
 
 
 async def get_docket(docket_id: int) -> dict:
-    """Get a docket (case record) by ID.
+    """Get a docket (case record) by ID."""
+    from . import config
+    if getattr(config, "DEMO_MODE", False):
+        from .demo_data import get_demo_docket
+        return get_demo_docket(docket_id)
 
-    Args:
-        docket_id: The CourtListener docket ID
-    """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/dockets/{docket_id}/",
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request("get", f"{COURTLISTENER_API_URL}/dockets/{docket_id}/")
 
 
 async def get_citations(opinion_id: int) -> dict:
-    """Get cases cited by a specific opinion.
+    """Get cases cited by a specific opinion."""
+    from . import config
+    if getattr(config, "DEMO_MODE", False):
+        from .demo_data import get_demo_citations
+        return get_demo_citations(opinion_id)
 
-    Args:
-        opinion_id: The CourtListener opinion ID to find citations for
-    """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/opinions-cited/",
-            params={"citing_opinion": opinion_id},
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request(
+        "get", f"{COURTLISTENER_API_URL}/opinions-cited/",
+        params={"citing_opinion": opinion_id},
+    )
 
 
 async def get_cited_by(opinion_id: int) -> dict:
-    """Get cases that cite a specific opinion (reverse citations).
+    """Get cases that cite a specific opinion (reverse citations)."""
+    from . import config
+    if getattr(config, "DEMO_MODE", False):
+        from .demo_data import get_demo_cited_by
+        return get_demo_cited_by(opinion_id)
 
-    Args:
-        opinion_id: The CourtListener opinion ID to find citing cases for
-    """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/opinions-cited/",
-            params={"cited_opinion": opinion_id},
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request(
+        "get", f"{COURTLISTENER_API_URL}/opinions-cited/",
+        params={"cited_opinion": opinion_id},
+    )
 
 
 async def list_courts() -> dict:
     """List all available courts and their identifiers."""
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{COURTLISTENER_API_URL}/courts/",
-            params={"page_size": 200},
-            headers=await _get_headers(),
-        )
-        resp.raise_for_status()
-        return resp.json()
+    return await _request(
+        "get", f"{COURTLISTENER_API_URL}/courts/",
+        params={"page_size": 200},
+    )

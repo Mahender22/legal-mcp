@@ -31,6 +31,13 @@ waitlist = ["fastapi>=0.115.0", "uvicorn>=0.30.0"]
 [project.scripts]
 legal-mcp = "legal_mcp.src.server:mcp.run"
 
+[project.urls]
+Homepage = "https://github.com/mahender-gumma/legal-mcp"
+Documentation = "https://github.com/mahender-gumma/legal-mcp#readme"
+Repository = "https://github.com/mahender-gumma/legal-mcp"
+Issues = "https://github.com/mahender-gumma/legal-mcp/issues"
+Changelog = "https://github.com/mahender-gumma/legal-mcp/blob/main/CHANGELOG.md"
+
 [tool.hatch.build.targets.wheel]
 packages = ["legal_mcp"]
 

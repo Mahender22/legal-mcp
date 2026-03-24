@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LegalMCP — US Case Law & Practice Management for AI Assistants</title>
     <meta name="description" content="The first comprehensive MCP server connecting Claude and GPT to real US case law, Clio practice management, and PACER court filings.">
+    <meta property="og:title" content="LegalMCP — US Case Law for AI Assistants">
+    <meta property="og:description" content="Connect Claude or GPT to 4M+ US court opinions, Clio practice management, and PACER filings. Research in seconds, not hours.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LegalMCP — US Case Law for AI Assistants">
+    <meta name="twitter:description" content="18 MCP tools for legal research. Case law, citations, practice management, and court filings.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script>
@@ -153,9 +159,14 @@
                 <a href="#pricing" class="hover:text-gold-400 transition-colors">Pricing</a>
                 <a href="#faq" class="hover:text-gold-400 transition-colors">FAQ</a>
             </div>
-            <a href="#waitlist" class="px-5 py-2 text-sm font-medium bg-gold-400/10 text-gold-400 border border-gold-400/20 rounded-lg hover:bg-gold-400/20 transition-all">
-                Join Waitlist
-            </a>
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/mahender-gumma/legal-mcp" target="_blank" class="text-parchment-200/40 hover:text-gold-400 transition-colors" title="GitHub">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </a>
+                <a href="#waitlist" class="px-5 py-2 text-sm font-medium bg-gold-400/10 text-gold-400 border border-gold-400/20 rounded-lg hover:bg-gold-400/20 transition-all">
+                    Join Waitlist
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -181,6 +192,14 @@
                     <a href="#demo" class="inline-flex items-center justify-center px-8 py-4 border border-parchment-200/15 text-parchment-100 rounded-lg hover:border-gold-400/30 hover:text-gold-400 transition-all text-base">
                         See it in action
                     </a>
+                </div>
+                <!-- Install snippet -->
+                <div class="hero-cta mt-6 flex items-center gap-3">
+                    <div class="code-block rounded-lg px-5 py-3 font-mono text-sm flex items-center gap-3">
+                        <span class="text-parchment-200/40">$</span>
+                        <span class="text-parchment-200/80">pip install legal-mcp</span>
+                        <button onclick="navigator.clipboard.writeText('pip install legal-mcp');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)" class="text-gold-400/60 hover:text-gold-400 text-xs ml-2 transition-colors">Copy</button>
+                    </div>
                 </div>
             </div>
 
@@ -221,6 +240,30 @@
             <div class="animate-on-scroll" style="transition-delay:0.3s">
                 <p class="stat-number font-display text-3xl md:text-4xl font-bold">&lt;2s</p>
                 <p class="text-parchment-200/40 text-sm mt-1">Avg Response</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST / BUILT ON -->
+    <section class="py-10 px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-wrap items-center justify-center gap-8 md:gap-16 text-parchment-200/30 text-sm">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gold-400/40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Powered by CourtListener
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gold-400/40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Open Source (MIT)
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gold-400/40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    MCP Protocol Standard
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-gold-400/40" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                    Runs 100% Locally
+                </div>
             </div>
         </div>
     </section>
@@ -443,6 +486,20 @@
         </div>
     </section>
 
+    <!-- TRY IT -->
+    <section class="py-16 px-6 border-t border-white/5">
+        <div class="max-w-2xl mx-auto text-center animate-on-scroll">
+            <p class="text-gold-400 font-mono text-sm tracking-widest uppercase mb-4">Try It Now</p>
+            <h2 class="font-display text-2xl md:text-3xl font-bold mb-4">No API keys? No problem.</h2>
+            <p class="text-parchment-200/50 mb-8">Demo mode ships with pre-cached results from landmark Supreme Court cases. Perfect for testing your setup.</p>
+            <div class="code-block rounded-xl p-6 font-mono text-sm text-left max-w-md mx-auto">
+                <p class="text-parchment-200/40 mb-2"># Install and run in demo mode</p>
+                <p class="text-parchment-200/80">pip install legal-mcp</p>
+                <p class="text-parchment-200/80">LEGAL_MCP_DEMO=true legal-mcp</p>
+            </div>
+        </div>
+    </section>
+
     <!-- WAITLIST -->
     <section id="waitlist" class="py-24 px-6 border-t border-white/5">
         <div class="max-w-xl mx-auto text-center">
@@ -451,6 +508,17 @@
                 <h2 class="font-display text-3xl md:text-4xl font-bold mb-4">Join the waitlist</h2>
                 <p class="text-parchment-200/50 mb-10">Be the first to access LegalMCP when we launch. Early members get 30% off for life.</p>
 
+                <!-- Plan selector -->
+                <div class="flex items-center justify-center gap-4 mb-6">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="plan" value="starter" checked class="accent-[#d4a853]">
+                        <span class="text-sm text-parchment-200/60">Starter ($79/mo)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="plan" value="pro" class="accent-[#d4a853]">
+                        <span class="text-sm text-parchment-200/60">Pro ($149/mo)</span>
+                    </label>
+                </div>
                 <form class="flex flex-col sm:flex-row gap-3" onsubmit="handleWaitlist(event)">
                     <input type="email" id="waitlist-email" placeholder="you@lawfirm.com" required
                         class="flex-1 px-5 py-3.5 bg-chamber-800/50 border border-white/10 rounded-lg text-parchment-100 text-sm font-body">
@@ -474,7 +542,11 @@
                 </svg>
                 <span class="font-display font-bold text-sm text-parchment-200/40">Legal<span class="text-gold-400/40">MCP</span></span>
             </div>
-            <p class="text-parchment-200/20 text-xs">Not legal advice. For research purposes only. &copy; 2026 LegalMCP.</p>
+            <div class="flex items-center gap-6">
+                <a href="https://github.com/mahender-gumma/legal-mcp" target="_blank" class="text-parchment-200/30 hover:text-gold-400/60 text-xs transition-colors">GitHub</a>
+                <a href="https://pypi.org/project/legal-mcp/" target="_blank" class="text-parchment-200/30 hover:text-gold-400/60 text-xs transition-colors">PyPI</a>
+                <p class="text-parchment-200/20 text-xs">Not legal advice. For research purposes only. &copy; 2026 LegalMCP.</p>
+            </div>
         </div>
     </footer>
 
@@ -492,6 +564,7 @@
         async function handleWaitlist(e) {
             e.preventDefault();
             const email = document.getElementById('waitlist-email').value;
+            const plan = document.querySelector('input[name="plan"]:checked')?.value || 'starter';
             const btn = document.getElementById('waitlist-btn');
             const msg = document.getElementById('waitlist-msg');
             btn.textContent = 'Joining...';
@@ -500,7 +573,7 @@
                 const resp = await fetch(`${API_URL}/api/waitlist`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, plan: 'starter'}),
+                    body: JSON.stringify({email, plan}),
                 });
                 const data = await resp.json();
                 btn.textContent = "You're in!";
