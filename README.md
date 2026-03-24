@@ -1,6 +1,6 @@
 # LegalMCP
 
-[![CI](https://github.com/mahender-gumma/legal-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/mahender-gumma/legal-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/Mahender22/legal-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Mahender22/legal-mcp/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/legal-mcp.svg)](https://pypi.org/project/legal-mcp/)
@@ -181,7 +181,7 @@ Your data stays on your machine. LegalMCP runs locally and connects directly to 
 
 ```bash
 # Clone and install
-git clone https://github.com/mahender-gumma/legal-mcp.git
+git clone https://github.com/Mahender22/legal-mcp.git
 cd legal-mcp
 pip install -e ".[dev,waitlist]"
 

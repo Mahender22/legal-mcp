@@ -602,11 +602,11 @@ git commit -m "feat: add demo mode — try LegalMCP without API keys"
 
 ```toml
 [project.urls]
-Homepage = "https://github.com/mahender-gumma/legal-mcp"
-Documentation = "https://github.com/mahender-gumma/legal-mcp#readme"
-Repository = "https://github.com/mahender-gumma/legal-mcp"
-Issues = "https://github.com/mahender-gumma/legal-mcp/issues"
-Changelog = "https://github.com/mahender-gumma/legal-mcp/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Mahender22/legal-mcp"
+Documentation = "https://github.com/Mahender22/legal-mcp#readme"
+Repository = "https://github.com/Mahender22/legal-mcp"
+Issues = "https://github.com/Mahender22/legal-mcp/issues"
+Changelog = "https://github.com/Mahender22/legal-mcp/blob/main/CHANGELOG.md"
 ```
 
 - [ ] **Step 2: Create publish workflow**
