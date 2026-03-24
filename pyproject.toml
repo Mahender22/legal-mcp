@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "legal-mcp"
+version = "0.1.0"
+description = "The first comprehensive US legal MCP server — case law, citations, practice management, and court filings for AI assistants"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "LegalMCP" }]
+keywords = ["mcp", "legal", "case-law", "courtlistener", "clio", "pacer", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Legal Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+waitlist = ["fastapi>=0.115.0", "uvicorn>=0.30.0"]
+
+[project.scripts]
+legal-mcp = "legal_mcp.src.server:mcp.run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["legal_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["legal_mcp/tests"]
+asyncio_mode = "auto"
