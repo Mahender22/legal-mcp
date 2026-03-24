@@ -13,14 +13,41 @@ async def _get_headers() -> dict:
 
 
 async def _get(endpoint: str, params: Optional[dict] = None) -> dict:
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            f"{CLIO_API_URL}/{endpoint}",
-            params=params or {},
-            headers=await _get_headers(),
+    """Make GET request to Clio API with error handling."""
+    if not CLIO_TOKEN:
+        raise ValueError(
+            "Clio API token not set. Set the CLIO_TOKEN environment variable. "
+            "Get an OAuth token at https://developer.clio.com (requires Pro plan)."
         )
-        resp.raise_for_status()
-        return resp.json()
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(
+                f"{CLIO_API_URL}/{endpoint}",
+                params=params or {},
+                headers=await _get_headers(),
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.TimeoutException:
+        raise ConnectionError(
+            "Clio API timed out. The service may be temporarily unavailable."
+        )
+    except httpx.HTTPStatusError as e:
+        status = e.response.status_code
+        if status == 401:
+            raise PermissionError(
+                "Clio authentication failed. Your CLIO_TOKEN may be expired. "
+                "Generate a new OAuth token at https://developer.clio.com"
+            )
+        elif status == 403:
+            raise PermissionError(
+                "Clio access denied. Your token may lack the required scopes."
+            )
+        elif status == 429:
+            raise ConnectionError("Clio rate limit exceeded. Wait a moment and try again.")
+        raise ConnectionError(f"Clio API error (HTTP {status}): {e}")
+    except httpx.ConnectError:
+        raise ConnectionError("Cannot connect to Clio. Check your internet connection.")
 
 
 async def search_contacts(
@@ -29,14 +56,7 @@ async def search_contacts(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Search contacts in Clio.
-
-    Args:
-        query: Search term (name, email, phone)
-        contact_type: 'Person' or 'Company'
-        page: Page number
-        limit: Results per page
-    """
+    """Search contacts in Clio."""
     params = {"page": page, "limit": limit, "fields": "id,name,type,email_addresses,phone_numbers"}
     if query:
         params["query"] = query
@@ -46,11 +66,7 @@ async def search_contacts(
 
 
 async def get_contact(contact_id: int) -> dict:
-    """Get a specific contact by ID.
-
-    Args:
-        contact_id: The Clio contact ID
-    """
+    """Get a specific contact by ID."""
     params = {"fields": "id,name,type,email_addresses,phone_numbers,addresses,company,custom_field_values"}
     return await _get(f"contacts/{contact_id}.json", params)
 
@@ -62,15 +78,7 @@ async def search_matters(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Search matters (cases) in Clio.
-
-    Args:
-        query: Search term (matter number, description)
-        status: 'Open', 'Closed', or 'Pending'
-        client_id: Filter by client contact ID
-        page: Page number
-        limit: Results per page
-    """
+    """Search matters (cases) in Clio."""
     params = {
         "page": page,
         "limit": limit,
@@ -86,11 +94,7 @@ async def search_matters(
 
 
 async def get_matter(matter_id: int) -> dict:
-    """Get a specific matter (case) by ID.
-
-    Args:
-        matter_id: The Clio matter ID
-    """
+    """Get a specific matter (case) by ID."""
     params = {
         "fields": (
             "id,display_number,description,status,client,practice_area,"
@@ -109,16 +113,7 @@ async def get_time_entries(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Get time entries from Clio.
-
-    Args:
-        matter_id: Filter by matter ID
-        user_id: Filter by user (attorney) ID
-        date_from: Start date filter (YYYY-MM-DD)
-        date_to: End date filter (YYYY-MM-DD)
-        page: Page number
-        limit: Results per page
-    """
+    """Get time entries from Clio."""
     params = {
         "page": page,
         "limit": limit,
@@ -142,15 +137,7 @@ async def get_tasks(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Get tasks from Clio.
-
-    Args:
-        matter_id: Filter by matter ID
-        status: 'Complete' or 'Incomplete'
-        assignee_id: Filter by assigned user ID
-        page: Page number
-        limit: Results per page
-    """
+    """Get tasks from Clio."""
     params = {
         "page": page,
         "limit": limit,
@@ -171,14 +158,7 @@ async def get_documents(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Get documents from Clio.
-
-    Args:
-        matter_id: Filter by matter ID
-        query: Search term for document name
-        page: Page number
-        limit: Results per page
-    """
+    """Get documents from Clio."""
     params = {
         "page": page,
         "limit": limit,
@@ -198,15 +178,7 @@ async def get_calendar_entries(
     page: int = 1,
     limit: int = 20,
 ) -> dict:
-    """Get calendar entries from Clio.
-
-    Args:
-        date_from: Start date filter (YYYY-MM-DD)
-        date_to: End date filter (YYYY-MM-DD)
-        matter_id: Filter by matter ID
-        page: Page number
-        limit: Results per page
-    """
+    """Get calendar entries from Clio."""
     params = {
         "page": page,
         "limit": limit,

@@ -1,24 +1,20 @@
+.git/
+.github/
 __pycache__/
 *.py[cod]
-*$py.class
 *.egg-info/
 dist/
 build/
 .eggs/
 venv/
 .venv/
-
-# Secrets
 .env
 *.env
 !.env.example
-
-# Data
 *.db
-
-# IDE / OS
-node_modules/
-.claude/
 .pytest_cache/
+.claude/
+node_modules/
+docs/
 .DS_Store
 Thumbs.db
