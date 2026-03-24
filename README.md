@@ -63,18 +63,20 @@ pip install git+https://github.com/Mahender22/legal-mcp.git
 
 ### Run
 
-```bash
-legal-mcp
-```
-
-### Try Demo Mode (No API Keys Needed)
+Want to try it without API keys? Enable demo mode first (optional):
 
 ```bash
 # Mac/Linux
-LEGAL_MCP_DEMO=true legal-mcp
+export LEGAL_MCP_DEMO=true
 
 # Windows
-set LEGAL_MCP_DEMO=true && legal-mcp
+set LEGAL_MCP_DEMO=true
+```
+
+Then start the server:
+
+```bash
+legal-mcp
 ```
 
 ### Connect to Claude Desktop
