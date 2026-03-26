@@ -16,6 +16,9 @@ venv/
 # Data
 *.db
 
+# MCP config (contains API tokens)
+.mcp.json
+
 # IDE / OS
 node_modules/
 .claude/
