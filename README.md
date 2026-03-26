@@ -117,18 +117,26 @@ Add to your `claude_desktop_config.json`:
 
 Run this command to add LegalMCP globally (available in every session):
 
+**Mac/Linux:**
 ```bash
 claude mcp add legal-mcp /path/to/legal-mcp-env/bin/legal-mcp
 ```
 
 **Windows:**
 ```bash
-claude mcp add legal-mcp C:/path/to/legal-mcp-env/Scripts/legal-mcp.exe
+claude mcp add legal-mcp C:\path\to\legal-mcp-env\Scripts\legal-mcp.exe
 ```
 
 To enable demo mode, add the env flag:
+
+**Mac/Linux:**
 ```bash
 claude mcp add legal-mcp -e LEGAL_MCP_DEMO=true -- /path/to/legal-mcp-env/bin/legal-mcp
+```
+
+**Windows:**
+```bash
+claude mcp add legal-mcp -e LEGAL_MCP_DEMO=true -- C:\path\to\legal-mcp-env\Scripts\legal-mcp.exe
 ```
 
 > **Tip:** To add it to a specific project only, add `-s project` flag or create a `.mcp.json` file in your project root.

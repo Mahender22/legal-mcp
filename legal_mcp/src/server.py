@@ -446,5 +446,12 @@ Common Reporters:
 """
 
 
+def main():
+    try:
+        mcp.run()
+    except KeyboardInterrupt:
+        pass
+
+
 if __name__ == "__main__":
-    mcp.run()
+    main()
