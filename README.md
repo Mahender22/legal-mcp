@@ -34,7 +34,7 @@ LegalMCP:  Found 52 results. Top case:
 | Find relevant cases | 45-90 min | **< 30 sec** |
 | Trace citation history | Open Westlaw, click around | *"Who cited this case?"* |
 | Pull client billing | Log into Clio, navigate menus | *"Total hours on Henderson?"* |
-| Monthly cost | $200-400 (Westlaw/Lexis) | **$79/mo** |
+| Monthly cost | $200-400 (Westlaw/Lexis) | **Free** |
 
 ## Quick Start
 
@@ -149,17 +149,17 @@ LegalMCP works with any MCP-compatible client. Add the `legal-mcp` command to yo
 
 Set environment variables for API access. See [SETUP.md](SETUP.md) for step-by-step instructions.
 
-| Variable | Required | Plan | Description |
-|----------|----------|------|-------------|
-| `COURTLISTENER_TOKEN` | Optional | Free | Higher rate limits for case law search |
-| `CLIO_TOKEN` | For Clio tools | Pro | OAuth token for practice management |
-| `PACER_USERNAME` | For PACER tools | Pro | PACER account username |
-| `PACER_PASSWORD` | For PACER tools | Pro | PACER account password |
-| `LEGAL_MCP_DEMO` | Optional | — | Set `true` for demo mode (no API keys) |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `COURTLISTENER_TOKEN` | Optional | Higher rate limits for case law search |
+| `CLIO_TOKEN` | For Clio tools | OAuth token for practice management |
+| `PACER_USERNAME` | For PACER tools | PACER account username |
+| `PACER_PASSWORD` | For PACER tools | PACER account password |
+| `LEGAL_MCP_DEMO` | Optional | Set `true` for demo mode (no API keys) |
 
 ## All 18 Tools
 
-### Case Law (Starter + Pro)
+### Case Law
 
 | Tool | What It Does |
 |------|-------------|
@@ -172,7 +172,7 @@ Set environment variables for API access. See [SETUP.md](SETUP.md) for step-by-s
 | `list_available_courts` | List all 400+ courts and their codes |
 | `list_reporter_abbreviations` | Decode reporter abbreviations (U.S., F.3d, etc.) |
 
-### Practice Management — Clio (Pro)
+### Practice Management — Clio
 
 | Tool | What It Does |
 |------|-------------|
@@ -184,13 +184,19 @@ Set environment variables for API access. See [SETUP.md](SETUP.md) for step-by-s
 | `get_matter_documents` | Documents attached to a matter |
 | `get_calendar` | Hearings, deadlines, and meetings |
 
-### Court Filings — PACER (Pro)
+### Court Filings — PACER
 
 | Tool | What It Does |
 |------|-------------|
 | `search_federal_cases` | Search PACER for federal court cases |
 | `get_federal_case` | Get case details from PACER |
 | `get_court_filings` | Get docket entries and filings |
+
+> **Note:** PACER charges $0.10/page for document downloads. LegalMCP searches and lists for free — it does not auto-download paid documents.
+
+## Pricing
+
+**Free and open source.** All 18 tools, MIT license, no paywall. Just install and go.
 
 ## Docker
 
@@ -219,20 +225,6 @@ LegalMCP is a [Model Context Protocol](https://modelcontextprotocol.io/) server.
 ```
 
 Your data stays on your machine. LegalMCP runs locally and connects directly to the APIs.
-
-## Pricing
-
-| | Starter | Pro |
-|---|---|---|
-| **Price** | $79/mo | $149/mo |
-| Case law search (4M+ opinions) | Yes | Yes |
-| Citation parsing & tracing | Yes | Yes |
-| 400+ courts & jurisdictions | Yes | Yes |
-| Clio integration | — | Yes |
-| PACER access | — | Yes |
-| Priority support | — | Yes |
-
-*Less than one billable hour. Pays for itself the first time it saves you a 3-hour research session.*
 
 ## Development
 
