@@ -343,8 +343,8 @@ async def search_federal_cases(
         case_name: Party name or case title (e.g., "Smith v. Jones")
         case_number: Specific case number (e.g., "1:23-cv-01234")
         court_id: Court code (e.g., 'nysd', 'cacd', 'txed')
-        date_filed_from: Start date (MM/DD/YYYY)
-        date_filed_to: End date (MM/DD/YYYY)
+        date_filed_from: Start date (YYYY-MM-DD)
+        date_filed_to: End date (YYYY-MM-DD)
     """
     result = await pacer.search_cases(
         case_name=case_name,
@@ -381,8 +381,8 @@ async def get_court_filings(
     Args:
         case_id: The PACER case ID
         court_id: The court code (e.g., 'nysd')
-        date_from: Start date filter (MM/DD/YYYY)
-        date_to: End date filter (MM/DD/YYYY)
+        date_from: Start date filter (YYYY-MM-DD)
+        date_to: End date filter (YYYY-MM-DD)
     """
     return await pacer.get_docket_entries(
         case_id=case_id,
